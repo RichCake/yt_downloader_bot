@@ -46,6 +46,7 @@ async def download_handler(message: Message) -> None:
             video = FSInputFile(path)
             w, h = utils.get_video_resolution(path)
             await message.answer_video(video, width=w, height=h)
+            os.remove(path)
         else:
             print("ОШИБКА: Видео не скачано или не найдено")
             await message.answer("Не удалось скачать видео :(")
