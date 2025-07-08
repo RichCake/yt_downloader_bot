@@ -2,7 +2,6 @@ import asyncio
 import logging
 import os.path
 import sys
-import time
 from os import getenv
 
 from aiogram import Bot, Dispatcher, html
@@ -15,15 +14,12 @@ from aiogram import F
 from dotenv import load_dotenv
 
 import downloader
+import utils
 
 load_dotenv()
 
-# Bot token can be obtained via https://t.me/BotFather
 TOKEN = getenv("BOT_TOKEN")
-
 YOUTUBE_REGEX = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(?:-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$"
-
-# All handlers should be attached to the Router (or Dispatcher)
 
 dp = Dispatcher()
 
@@ -43,31 +39,24 @@ async def command_start_handler(message: Message) -> None:
 
 @dp.message(F.text.regexp(YOUTUBE_REGEX))
 async def download_handler(message: Message) -> None:
-    """
-    Handler will forward receive a message back to the sender
-
-    By default, message handler will handle all message types (like a text, photo, sticker etc.)
-    """
     try:
+        await message.answer("Скачиваем видео...")
         path = await asyncio.to_thread(downloader.download, message.text)
         if os.path.isfile(path):
             video = FSInputFile(path)
-            await message.answer_video(video)
+            w, h = utils.get_video_resolution(path)
+            await message.answer_video(video, width=w, height=h)
         else:
-            print("AAAA")
-
-        # Send a copy of the received message
-        await message.send_copy(chat_id=message.chat.id)
-    except TypeError:
-        # But not all the types is supported to be copied so need to handle it
-        await message.answer("Nice try!")
+            print("ОШИБКА: Видео не скачано или не найдено")
+            await message.answer("Не удалось скачать видео :(")
+    except Exception as e:
+        print(e)
+        await message.answer("Error!")
 
 
 async def main() -> None:
-    # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-    # And the run events dispatching
     await dp.start_polling(bot)
 
 

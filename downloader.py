@@ -19,28 +19,7 @@ def generate_unique_filename(prefix, suffix):
 
 
 def download(url):
-    audio_filename = generate_unique_filename("audio_", ".m4a")
     video_filename = generate_unique_filename("video_", ".mp4")
-    result_filename = generate_unique_filename("result_", ".mp4")
-
-    # try:
-    #     opts = {
-    #         'extract_flat': 'discard_in_playlist',
-    #         'format': 'bv*[ext=mp4][vcodec^=avc]]',
-    #         'fragment_retries': 10,
-    #         'ignoreerrors': 'only_download',
-    #         'merge_output_format': 'mp4',
-    #         'outtmpl': {'default': video_filename},
-    #         'paths': {'home': OUTPUT_VIDEO_FOLDER},
-    #         'postprocessors': [{'key': 'FFmpegConcat',
-    #                             'only_multi_video': True,
-    #                             'when': 'playlist'}],
-    #         'retries': 10
-    #     }
-    #     with YoutubeDL(opts) as ydl:
-    #         ydl.download(url)
-    #
-    #     if not os.path.exists(video_filename)
     opts = {
         'extract_flat': 'discard_in_playlist',
         'format': 'bv[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]',
@@ -55,5 +34,6 @@ def download(url):
         'retries': 10
     }
     with YoutubeDL(opts) as ydl:
-        ydl.download([url])
+        ydl.download(url)
+
     return os.path.join(OUTPUT_VIDEO_FOLDER, video_filename)
